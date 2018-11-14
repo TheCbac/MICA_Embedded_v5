@@ -89,21 +89,24 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
         /* The scan was either started or stopped */
         /* If the fast scan times out, it then goes to the slow scan */
         case CYBLE_EVT_GAPC_SCAN_START_STOP: {
-             if(CyBle_GetState() != CYBLE_STATE_SCANNING) {
+            CYBLE_STATE_T state = CyBle_GetState();
+             if( state != CYBLE_STATE_SCANNING) {
                 /* Indicate that the scan Stopped */
                 usbPackets_sendPacket(packets_RSP_SCAN_STOPPED, ZERO, NULL, packets_FLAG_NONE);
                 /* See if scan was stopped to connect */
-                if(getPendingConnection()){
+                if(getPendingConnection() && state == CYBLE_STATE_DISCONNECTED){
                     /* Clear the flag */
                     setPendingConnection(false);
                     /* Initiate a connection */
                     CYBLE_GAP_BD_ADDR_T deviceAddr;
+                    deviceAddr.type = CYBLE_GAP_ADDR_TYPE_PUBLIC;
                     getConnectingDeviceId(deviceAddr.bdAddr);
                     CYBLE_API_RESULT_T result = CyBle_GapcConnectDevice(&deviceAddr);
                     /* Indicate that the connection failed */
                     if (result != CYBLE_ERROR_OK){
                         uint8_t bdAddr[CYBLE_GAP_BD_ADDR_SIZE];
                         getConnectingDeviceId(bdAddr);
+                        usbPackets_log("Error connecting: 0x%x", result);
                         /* Send response packet */
                         usbPackets_sendPacket(packets_RSP_CONNECTION_LOST, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
                     }

@@ -89,7 +89,10 @@ uint32_t cmdHandler_supportCube(packets_PACKET_S* rxPacket, packets_PACKET_S* tx
                 /* Store the device id */
                 setConnectingDeviceId( rxPacket->payload);
                 /* Initiate the connection */
-                CyBle_GapcConnectDevice( (CYBLE_GAP_BD_ADDR_T *) rxPacket->payload);
+                CYBLE_GAP_BD_ADDR_T peerAddr;
+                memcpy(peerAddr.bdAddr, rxPacket->payload, CYBLE_GAP_BD_ADDR_SIZE);
+                peerAddr.type = CYBLE_GAP_ADDR_TYPE_PUBLIC;
+                CyBle_GapcConnectDevice(&peerAddr);
             /* Need to stop scan before we can connect */
             } else if( bleState == CYBLE_STATE_SCANNING) {
                 /* Indicate that the there is a desired connection pending*/
