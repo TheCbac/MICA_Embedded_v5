@@ -1,0 +1,20 @@
+CHANGE LOG
+DriveBot PSoC4 MCU embedded - v5.2.z
+
+DriveBot_v5.2
+* Make motors API driven around motor handles 
+* Button need to pass in interrupt handler
+* Move EnableBtnInterrupts() to Btn_Start()
+
+2018.08.06
+* Editing packet_testing.c/h to add test suites
+
+v5.2.1 CC - 2018.05.31
+* Switch to PCB v5.2.1
+* (Re)Enable usbUart SCB
+* Remove debugUart
+Components to Make:
+* Push button
+
+v5.2.0 CC - 2018.04.10
+* Initial v5 project

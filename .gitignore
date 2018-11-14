@@ -1,0 +1,15 @@
+Generated_Source/
+*.ccheney
+*.smccuen
+.vscode
+codegentemp/
+CortexM0/
+Export/
+
+*.cycdx
+*.html
+*.svd
+*.rpt
+*.cyfit
+*.log
+*.zip

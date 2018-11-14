@@ -1,0 +1,36 @@
+Last Modified Date & Time: 08/14/2017 11:59:18
+
+02_IMU_App_v4.0: TopDesign.cysch
+	ADC [v2.40] to [v2.50]
+	uSecondTimer [v2.70] to [v2.80]
+
+
+Last Modified Date & Time: 08/15/2017 01:00:47
+
+
+Last Modified Date & Time: 03/13/2018 00:20:13
+
+00_IMU_Launcher_v5.0: 00_IMU_Launcher_v5.0.cydwr
+	cy_boot [v5.60] to [v5.70]
+
+00_IMU_Launcher_v5.0: TopDesign.cysch
+	launcher [v1.50] to [v1.60]
+
+
+Last Modified Date & Time: 05/03/2018 16:14:36
+
+dev_inclinometer_v5.0: TopDesign.cysch
+	MICA_I2C [v1.0] to [v2.0]
+	I2C [v3.20] to [v4.0]
+
+
+Last Modified Date & Time: 10/02/2018 12:09:54
+
+dev_basicUartComm_v5.0: dev_basicUartComm_v5.0.cydwr
+	Em_EEPROM_Dynamic [v2.0] to [v2.20]
+
+dev_basicUartComm_v5.0: TopDesign.cysch
+	MICA_I2C [v1.0] to [v2.0]
+	I2C [v3.20] to [v4.0]
+
+
