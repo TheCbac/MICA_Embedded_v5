@@ -17,7 +17,6 @@
 * 2018.10.19  - Document Created
 ********************************************************************************/
 #include "supportBleCallback.h"
-#include "usbPacketManager.h"
 #include "stdlib.h"
 
 /* Store the connecting device ID */
@@ -82,7 +81,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                 /* RSSI */
                 payload[i++] = rssi;
                 /* Send the packet */
-                usbPackets_sendPacket(packets_RSP_DEVICE_FOUND, i, payload, packets_FLAG_NONE);
+                packets_usb_sendPacket(packets_RSP_DEVICE_FOUND, i, payload, packets_FLAG_NONE);
             }
             break;   
         }
@@ -92,7 +91,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
             CYBLE_STATE_T state = CyBle_GetState();
              if( state != CYBLE_STATE_SCANNING) {
                 /* Indicate that the scan Stopped */
-                usbPackets_sendPacket(packets_RSP_SCAN_STOPPED, ZERO, NULL, packets_FLAG_NONE);
+                packets_usb_sendPacket(packets_RSP_SCAN_STOPPED, ZERO, NULL, packets_FLAG_NONE);
                 /* See if scan was stopped to connect */
                 if(getPendingConnection() && state == CYBLE_STATE_DISCONNECTED){
                     /* Clear the flag */
@@ -106,9 +105,9 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                     if (result != CYBLE_ERROR_OK){
                         uint8_t bdAddr[CYBLE_GAP_BD_ADDR_SIZE];
                         getConnectingDeviceId(bdAddr);
-                        usbPackets_log("Error connecting: 0x%x", result);
+                        packets_usb_log("Error connecting: 0x%x", result);
                         /* Send response packet */
-                        usbPackets_sendPacket(packets_RSP_CONNECTION_LOST, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
+                        packets_usb_sendPacket(packets_RSP_CONNECTION_LOST, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
                     }
    
                 }
@@ -127,7 +126,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
             uint8_t bdAddr[CYBLE_GAP_BD_ADDR_SIZE];
             getConnectingDeviceId(bdAddr);
             /* Send response packet */
-            usbPackets_sendPacket(packets_RSP_CONNECTED, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);            
+            packets_usb_sendPacket(packets_RSP_CONNECTED, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);            
             break;   
         }
         /* Store the BLE handle */
@@ -137,7 +136,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
         }
         /* Disover complete */
         case CYBLE_EVT_GATTC_DISCOVERY_COMPLETE: {
-            usbPackets_log("Discovery completed");
+            packets_usb_log("Discovery completed");
             break;   
         }
         
@@ -153,13 +152,13 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                 uint8_t bdAddr[CYBLE_GAP_BD_ADDR_SIZE];
                 getConnectingDeviceId(bdAddr);
                 /* Send response packet */
-                usbPackets_sendPacket(packets_RSP_DISCONNECTED, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
+                packets_usb_sendPacket(packets_RSP_DISCONNECTED, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
             } else {
                 /* indicate to the remote device the disconnect*/
                 uint8_t bdAddr[CYBLE_GAP_BD_ADDR_SIZE];
                 getConnectingDeviceId(bdAddr);
                 /* Send response packet */
-                usbPackets_sendPacket(packets_RSP_CONNECTION_LOST, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
+                packets_usb_sendPacket(packets_RSP_CONNECTION_LOST, CYBLE_GAP_BD_ADDR_SIZE, bdAddr, packets_FLAG_NONE);
             }
             break;   
         }
@@ -171,7 +170,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
             uint16_t bufferLen =  CYBLE_GAP_BD_ADDR_SIZE+ sizeof(charHandle) + sizeof(dataLen) + dataLen;
             uint8_t * outBuffer = malloc(bufferLen);
             if (outBuffer != NULL) {
-                usbPackets_log("Read successful");
+                packets_usb_log("Read successful");
                 /* Pack the buffer */
                 /* Device ID */
                 getConnectingDeviceId(outBuffer);
@@ -184,12 +183,12 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                 /* Data */
                 memcpy(&outBuffer[i], readRsp->value.val, dataLen);
                 /* Send response packet */
-                usbPackets_sendPacket(packets_RSP_READ, bufferLen, outBuffer, packets_FLAG_NONE);
+                packets_usb_sendPacket(packets_RSP_READ, bufferLen, outBuffer, packets_FLAG_NONE);
                 /* Destroy buffer */
                 free(outBuffer);
                 /* failed to create the buffer, send everything but the data */
             } else {
-                usbPackets_log("Read failed");
+                packets_usb_log("Read failed");
                 uint16_t failedLen = CYBLE_GAP_BD_ADDR_SIZE+ sizeof(charHandle) + sizeof(dataLen);
                 uint8_t failedBuffer[failedLen];
                 getConnectingDeviceId(outBuffer);
@@ -200,7 +199,7 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                 outBuffer[i++] = (dataLen >> BITS_ONE_BYTE) & MASK_BYTE_ONE;
                 outBuffer[i++] = (dataLen & MASK_BYTE_ONE);
                 /* Send out the data */
-                usbPackets_sendPacket(packets_RSP_READ, failedLen, failedBuffer, packets_FLAG_MEMORY);
+                packets_usb_sendPacket(packets_RSP_READ, failedLen, failedBuffer, packets_FLAG_MEMORY);
                 
             }
             break;
@@ -227,15 +226,15 @@ void supportBleHandler(uint32 eventCode, void *eventParam){
                 /* Data */
                 memcpy(&outBuffer[i], notification->handleValPair.value.val, dataLen);
                 /* Send response packet */
-                uint32_t err = usbPackets_sendPacket(packets_RSP_NOTIFY, bufferLen, outBuffer, packets_FLAG_NONE);
+                uint32_t err = packets_usb_sendPacket(packets_RSP_NOTIFY, bufferLen, outBuffer, packets_FLAG_NONE);
                 if(err) {
-                    usbPackets_log("Notify send err: 0x%x", err);      
+                    packets_usb_log("Notify send err: 0x%x", err);      
                 }
                 /* Destroy buffer */
                 free(outBuffer);
                 /* failed to create the buffer, send everything but the data */
             } else {
-                usbPackets_log("Notify buffer err");      
+                packets_usb_log("Notify buffer err");      
             }
             break;   
         }

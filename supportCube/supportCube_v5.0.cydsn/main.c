@@ -17,8 +17,9 @@
 * 2018.10.19  - Document Created
 ********************************************************************************/
 #include "project.h"
-#include "usbPacketManager.h"
+//#include "usbPacketManager.h"
 #include "supportBleCallback.h"
+#include "supportCommands.h"
 
 /* ####################### BEGIN PROGRAM CONFIGURATION ###################### */
 
@@ -51,6 +52,7 @@ void ISR_isrName(void);
 
 /* Global Variables */
 volatile bool flag_isrFlag = false;
+#define USB_PACKET_LEN_MAX  512
 
 /* Main Program */
 #if !defined(MICA_DEBUG) && !defined(MICA_TEST)
@@ -73,7 +75,14 @@ int main(void)
     CyBle_Start(supportBleHandler);
     
     /* Setup Packet */
-    uint32_t err = usbPackets_init();
+    
+    packets_usbComms.rxGetBytesPending = usbUart_getRxBufferSize;
+    packets_usbComms.rxReadByte = usbUart_getChar;
+    packets_usbComms.txPutArray = usbUart_putArray;
+    packets_usbComms.ackCallback = ackHandler_supportCube;
+    packets_usbComms.cmdCallback = cmdHandler_supportCube;
+    
+    uint32_t err = packets_usb_init(USB_PACKET_LEN_MAX);
     if(err){
         LEDS_Write(LEDS_ON_MAGENTA);
         for(;;){}
@@ -82,7 +91,7 @@ int main(void)
     /* Infinite Loop */
     for(;;){
         /* Process the recieved packet */
-        usbPackets_processIncoming();
+        packets_usb_processIncoming();
         /* Process BLE events */
         CyBle_ProcessEvents();
     }
