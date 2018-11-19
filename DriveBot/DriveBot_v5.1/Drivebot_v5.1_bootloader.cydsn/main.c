@@ -3,7 +3,7 @@
 *                           MIT BioInstrumentation Lab
 *
 * File: main.c
-* Workspace: DriveBot_v5.1
+* Workspace: DriveBot_v5.1_bootloader
 * Project: DriveBot_v5.1.0
 * Version: 1.0.0
 * Authors: Craig Cheney
@@ -12,7 +12,7 @@
 * PSoC: CY8C4245LQI-483
 *
 * Brief:
-*   This is the top-level application file for PSoC 4 MCU.
+*   This is the bootloader application for the drivebot PSoC 4 MCU
 *
 * 2018.11.15  - Document Created
 ********************************************************************************/
@@ -57,14 +57,19 @@ volatile bool flag_isrFlag = false;
 * Function Name: main()
 ********************************************************************************
 * Summary:
-*   The top-level application function for the project.
+*    Enables the bootloader component, which waits for data from the usbUart.
 *
 *******************************************************************************/
 int main(void)
 {
     /* Enable global interrupts. */
     CyGlobalIntEnable; 
-    
+    /* Start the USB uart */
+    usbUart_Start();
+    /* Turn on the Red LED */
+    LEDS_Write(LEDS_ON_RED);
+    /* Wait for bootloader data - This will never return */
+    usbBootloader_Start();
     /* Infinite Loop */
     for(;;) {
         
